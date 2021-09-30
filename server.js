@@ -32,70 +32,47 @@ app.get('/', async (request, response)=>{
 })
 
 // Create (POST Request)
-app.post('/addTask', (request, response) =>{
-    db.collection('tasks').insertOne({
-        taskName: request.body.taskName.trim(),
-        completed: false
-    })
-    .then (result =>{
+app.post('/addTask', async (request, response) =>{
+    try {
+        result = await db.collection('tasks').insertOne({
+            taskName: request.body.taskName.trim(),
+            completed: false
+        })
         console.log('Task was added')
         response.redirect('/')
-    })
-    .catch(error => console.error(error))
+} catch(err) {
+    console.error(error)    
+    }  
 }) 
 
-// Update (PUT Request)
-app.put('/markComplete', (request, response) => {
-    db.collection('tasks').updateOne({
-            taskName: request.body.nameOfTask,
-    },{
-        $set: {
-            completed:true
-          }
-   })
-    .then(result => {
-        console.log('Completed Task')
-        response.json('Task Completed')
-    })
-    .catch(error => console.error(error))
-})
-
-app.put('/toggleComplete', async (request, response) => {
-
-    console.log('toggle complete is hitting', request.body)
-    // const task = await db.collection('tasks').findOne(request.body.nameOfTask)
+// // Update (PUT Request)
+app.put('/toggleComplete', async (request, response) => { 
     try{
         const result = await db.collection('tasks').findOneAndUpdate({
                  taskName: request.body.nameOfTask,
          },{
-             $set: {
-                // !task.completed
+             $set: {               
                  completed: request.body.completed
                }
         }, {returnOriginal: true})
-         //.then(result => {
-             console.log('Incomplete Task')
-             response.json('Task Incompleted')
-             console.log(result)
-
+             console.log('Task Toggled')
+             response.json('Task Toggled')      
     } catch(err){
         console.error(err)
-    }
-   // })
-   // .catch(error => console.error(error))
+    } 
 })
 
 // Delete (DELETE Request)
-app.delete('/removeTask', (request, response) => {
-    db.collection('tasks').deleteOne({
-        taskName: request.body.nameOfTask
-    })
-    .then(result => {
-        console.log('Task Deleted')
-        response.json('Deleted Task')
-    })
-    .catch(error => console.error(error))
-
+app.delete('/removeTask', async (request, response) => {
+    try {
+       result = await db.collection('tasks').deleteOne({
+            taskName: request.body.nameOfTask
+        })       
+            console.log('Task Deleted')
+            response.json('Deleted Task')
+        } catch(err) {
+        console.error(err)
+    }    
 })
 
 // Listen 
